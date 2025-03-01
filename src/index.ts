@@ -34,7 +34,7 @@ async function main() {
                     console.log(err);
                 }
                 console.log(result);
-                await sleep(3000);
+                await sleep(6000);
                 fetching = false;
             // });
         }
