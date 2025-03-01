@@ -1,8 +1,13 @@
 import { Part } from "genkit";
+import fs from 'fs';
 
 export class GameHistory {
     history: Part[] = [];
-    constructor() {}
+    constructor(loadHistory: boolean = false) {
+        if(loadHistory) {
+            this.loadHistory();
+        }
+    }
 
     insertHistoryItems(part: Part) {
         if(part.text) {
@@ -14,8 +19,19 @@ export class GameHistory {
         this.history.push(part);
     }
  
-    getHistory() {
+    getHistory(): Part[] {
         return this.history;
     }
-    
+
+    exportHistory(): Promise<void> {
+        fs.writeFileSync('history.json', JSON.stringify(this.history));
+        return Promise.resolve();
+    }
+
+    private loadHistory(): Promise<void> {
+        const history = fs.readFileSync('history.json', 'utf8');
+        this.history = JSON.parse(history);
+        return Promise.resolve();
+    }
+
 }
