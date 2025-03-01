@@ -2,6 +2,10 @@ import { z } from "genkit/beta";
 import { ai, PokeState } from "../config";
 import axios from "axios";
 
+function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
 export let state = {
     "currentGoal": "Leave pallet town and get a starter pokemon",
     "name": "red",
@@ -39,8 +43,8 @@ export const sendKeyPress = ai.defineTool({
         inputSchema: z.object({
             "buttonPresse": z.string(),
         }),
-        outputSchema: z.string(),
-}, async (keyPresses): Promise<string> => {
+        outputSchema: z.object({"dataUrl": z.string().describe('a base64 encoded image from the game')}),
+}, async (keyPresses) => {
     state.lastTakenAction = keyPresses.buttonPresse.toLowerCase().trim();
      switch(keyPresses.buttonPresse.toLowerCase().trim()) {
         case 'a':
@@ -71,5 +75,9 @@ export const sendKeyPress = ai.defineTool({
             console.log('could not find keypress');
             break;
      }
-   return 'done';
+     await sleep(500);
+     const img = await axios.get("http://localhost:8000/frame", { responseType: 'arraybuffer' });
+     const base64String = Buffer.from(img.data, 'binary').toString('base64');
+     const dataUrl = `data:image/jpeg;base64,${base64String}`;
+     return {dataUrl};
 });

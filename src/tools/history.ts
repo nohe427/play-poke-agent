@@ -13,10 +13,11 @@ export class GameHistory {
         if(part.text) {
             part.text = `Timestamp: ${Date.now()}\n${part.text}`
         }
-        if (this.history.length > 399) {
+        if (this.history.length > 200) {
             this.history.shift();
         }
         this.history.push(part);
+        this.exportHistory()
     }
  
     getHistory(): Part[] {
