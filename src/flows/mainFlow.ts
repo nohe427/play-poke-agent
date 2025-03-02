@@ -1,12 +1,13 @@
 import { z } from "genkit";
 import { ai, GcsSessionStorage, PokeState } from "../config";
 import { gemini, gemini20ProExp0205, gemini20Flash001 } from '@genkit-ai/vertexai';
-import { sendKeyPress, updateState, state } from "../tools/emulatorTools";
+import {gemini20ProExp0205 as AIgemini20ProExp0205} from '@genkit-ai/googleai';
+import { sendKeyPress, state, updateCurrentGoal } from "../tools/emulatorTools";
 import axios from "axios";
 import { GameHistory } from "../tools/history";
 
 let previousState = "";
-let currentState = "fresh game";
+let currentState = "";
 
 const gameHistory = new GameHistory();
 
@@ -33,18 +34,18 @@ export const mainFlow = ai.defineFlow({
     } catch (err) {
         console.log('could not load img part', err);
     }
-    gameHistory.insertHistoryItems({
-        text: `
-        Current game state: ${JSON.stringify(state)}
+    // gameHistory.insertHistoryItems({
+    //     text: `
+    //     Current game state: ${JSON.stringify(state)}
         
-        ${currentState}
+    //     ${currentState}
 
-        Previous Game State:
-        ${previousState}`
-    })
-    gameHistory.insertHistoryItems(imgPart);
-    console.log('sending request');
-    const result = await ai.generate({
+    //     Previous Game State:
+    //     ${previousState}`
+    // })
+    // gameHistory.insertHistoryItems(imgPart);
+    // console.log('sending request');
+    const logic = await ai.generate({
         system: `
         You are playing Pokemon Red on the Gameboy. Your goal is to beat the
         Pokemon game by training your pokemon up, capturing as many as you can,
@@ -63,28 +64,73 @@ export const mainFlow = ai.defineFlow({
 
         Stairwells and ladders let you move between floors.
 
+        Rugs on floor indicate you can exit a building at that location.
+
         In a dialog the right pointing arrow indicates what you currently have selected.
 
         To run when you are in battle, you must navigate to the RUN option and select it with the 'a' key
+
+        You should try to battle as long as you have 50% of your health so you can level your pokemon up
+
+        If pressing right does not change the menu how you expect it to, then try pressing down instead.
+
+        If pressing down doesn't help, try pressing 'b'
+
+        If you think the game is stuck, send the 'a' button
+
+        To advance dialog you use the 'a' button.
         `,
+        // model: gemini20ProExp0205,
         model: gemini20ProExp0205,
         returnToolRequests: true,
-        tools: [sendKeyPress, updateState],
+        tools: [],
         prompt: [
             ...gameHistory.getHistory(),
             {text:`
-                Given the latest image based on the timestamp provided. What is the next key you would
+                Given image ${Math.round((gameHistory.getHistory().length)/2)} based on the timestamp provided. What is the next key you would
                 like to press to advance the game? Explain your reasoning in your response.
 
                 You can only pick one key at a time to press.
 
                 If your game coords did not change between current state and previous state do not
                 perform the same action.
+
+                Provide a reason for your button press.
+
+                Characters Current Game State:
+                ${currentState}
+
+                Characters Previous Game State:
+                ${previousState}
+
+                Characters Goals:
+                ${state}
                 `
             },
+            imgPart,
             ],
     });
+
+    gameHistory.insertHistoryItems({text: logic.text})
+    gameHistory.insertHistoryItems(imgPart);
+
+    console.log(logic.text);
+
+    const result = await ai.generate({
+        system: `
+        Your goal is to pick the correct tool call for the logic argument provided
+        in the prompt
+        `,
+        // model: gemini20ProExp0205,
+        model: gemini20Flash001,
+        returnToolRequests: true,
+        tools: [sendKeyPress],
+        prompt: [
+            {text:`pick the button press from this reasoning: ${logic.text}`},
+        ]
+    });
     const tr = result.toolRequests;
+    // console.log(result.text);
     if (!tr) {
         return result.text;
     }
@@ -95,9 +141,42 @@ export const mainFlow = ai.defineFlow({
         if (toolRequest.toolRequest.name === "sendKeyPress" && input) {
             await sendKeyPress(input as {buttonPresse: string});
         }
-        if (toolRequest.toolRequest.name === "updateState" && input) {
-            await updateState(input as PokeState);
-        }
+        // if (toolRequest.toolRequest.name === "updateState" && input) {
+        //     await updateState(input as PokeState);
+        // }
     }
+
+    const goalRevision = await ai.generate({
+        system: `
+        Update the system goal based on the current game history and screenshots.
+        If no goal needs to be updated, do not update the goal.
+
+        Provide a reasoning in your response.
+        `,
+        model: gemini20Flash001,
+        returnToolRequests: true,
+        tools: [updateCurrentGoal],
+        prompt: [
+            ...gameHistory.getHistory(),
+            {text: `current goal : ${state.currentGoal}`}
+        ]
+    });
+    const gtr = result.toolRequests;
+    console.log(goalRevision.text);
+    if (!gtr) {
+        return goalRevision.text;
+    }
+    for(var i = 0; i < gtr.length; i++) {
+        const toolRequest = gtr[i];
+        const input = toolRequest.toolRequest.input;
+        console.log(toolRequest.toolRequest.name, input)
+        if (toolRequest.toolRequest.name === "updateCurrentGoal" && input) {
+            await updateCurrentGoal(input as {currentGoal: string});
+        }
+        // if (toolRequest.toolRequest.name === "updateState" && input) {
+        //     await updateState(input as PokeState);
+        // }
+    }
+
     return result.text;
 })

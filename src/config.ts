@@ -1,6 +1,7 @@
 import vertexAI from '@genkit-ai/vertexai';
 import {genkit, SessionData, SessionStore} from 'genkit';
 import {Storage} from '@google-cloud/storage';
+import { googleAI } from '@genkit-ai/googleai';
 
 const projectId = 'old-man-yells-at-cloud';
 const storage  = new Storage({projectId: projectId})
@@ -16,6 +17,9 @@ export interface PokeState {
 
 export const ai = genkit({
     plugins: [
+        googleAI({
+          apiKey: '',
+        }),
         vertexAI({
           location: 'us-central1',
           projectId: projectId,

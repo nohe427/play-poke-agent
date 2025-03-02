@@ -1,6 +1,8 @@
 import { Part } from "genkit";
 import fs from 'fs';
 
+console.log("Sorry about the human intervention :(")
+
 export class GameHistory {
     history: Part[] = [];
     constructor(loadHistory: boolean = false) {
@@ -13,7 +15,7 @@ export class GameHistory {
         if(part.text) {
             part.text = `Timestamp: ${Date.now()}\n${part.text}`
         }
-        if (this.history.length > 50) {
+        if (this.history.length > 30) {
             this.history.shift();
         }
         this.history.push(part);
@@ -21,7 +23,15 @@ export class GameHistory {
     }
  
     getHistory(): Part[] {
-        return this.history;
+        let cloned =  this.history.map(x => Object.assign({}, x));
+        for (let i = 0; i < cloned.length; i++) {
+            if(cloned[i].text) {
+                cloned[i].text = cloned[i].text + `
+                This history state refers to image ${Math.round((i/2) + 1)}
+                `;
+            }
+        }
+        return cloned;
     }
 
     exportHistory(): Promise<void> {

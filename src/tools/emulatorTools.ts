@@ -7,29 +7,32 @@ function sleep(ms: number): Promise<void> {
   }
 
 export let state = {
-    "currentGoal": "Leave pallet town and get a starter pokemon",
+    "currentGoal": `
+        First - Get to Viridian City.
+        Next - Train to fight brock in the area near Pewter City
+        Next - This means you will likely need to purchase some pokeballs at a pokemart.
+        Next - Once you have four pokemon captured, you are ready to battle Brock
+        
+        Pewter City is North of Pallette town. Try to head North on Route 1 if your
+        Pokemon are low on health. once you make it to a pokecenter and heal, head back into
+        the grassy area to train`,
     "name": "red",
     "rival": "blue",
     "history": "",
     "lastTakenAction": "",
 }
 
-export const updateState = ai.defineTool({
-    name: "updateState",
+export const updateCurrentGoal = ai.defineTool({
+    name: "updateCurrentGoal",
     description: `
-        Updates the game state to reflect the new goals in the game given the
-        screenshots and recent button presses.
+        Update the current goal to match what your character needs to accomplish
     `,
     inputSchema: z.object({
         "currentGoal": z.string(),
-        "name": z.string(),
-        "rival": z.string(),
-        "history": z.string(),
-        "lastTakenAction": z.string(),
     }),
     outputSchema: z.string(),
 }, async (input) => {
-    state = input;
+    state.currentGoal = input.currentGoal;
     return JSON.stringify(state);
 });
 

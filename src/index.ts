@@ -23,10 +23,10 @@ async function main() {
             });
         }
         if(fetching === false) {
-            console.log('starting to fetch');
+            // console.log('starting to fetch');
             fetching = true;
             // sleep(500).then(() => {
-                console.log("RUNNING FETCHING")
+                console.log("Consulting AI...\n\n")
                 let result = "";
                 try {
                     result = await mainFlow({imgUrl: 'http://127.0.0.1:8000/frame'});
@@ -34,7 +34,7 @@ async function main() {
                     console.log(err);
                 }
                 console.log(result);
-                await sleep(6000);
+                await sleep(12000);
                 fetching = false;
             // });
         }
