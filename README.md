@@ -7,7 +7,8 @@
   - AI tries to run from trainer battles which it cannot do!
   - AI needs to attempt to capture injured Pokemon with pokeballs
 - Give the AI smarter intelligence when it runs into a pokemart or a pokestore
-  - Right now the AI has trouble figuring out how to exit a pokecenter or pokemart
+  - Right now the AI has trouble figuring out how to exit a pokecenter or
+    pokemart
 - Give the AI a way to assess goals based on ROM state
 - Give the AI a better sink map
   - The AI will occassionally get stuck pacing on screen for no reason. Make it
@@ -16,3 +17,5 @@
   attack) power from ROM state.
 - Give more button presses other than left, right, up, and down. Sometimes the
   AI isn't aware it can interact with signs, etc...
+- Add in secrets so I don't have to worry about accidentally committing my API
+  keys.
