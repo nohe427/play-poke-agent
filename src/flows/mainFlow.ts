@@ -85,7 +85,10 @@ export const mainFlow = ai.defineFlow({
         Try to catch pokemon you do not yet have if you have pokeballs in your inventory
         `,
         // model: gemini20ProExp0205,
-        model: gemini20ProExp0205,
+        model: gemini20Flash001,
+        config: {
+            version: 'gemini-2.0-flash-thinking-exp-01-21'
+        },
         returnToolRequests: true,
         tools: [],
         prompt: [

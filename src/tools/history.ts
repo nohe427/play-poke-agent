@@ -15,7 +15,7 @@ export class GameHistory {
         if(part.text) {
             part.text = `Timestamp: ${Date.now()}\n${part.text}`
         }
-        if (this.history.length > 30) {
+        if (this.history.length > 16) {
             this.history.shift();
         }
         this.history.push(part);
