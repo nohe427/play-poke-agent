@@ -50,6 +50,7 @@ export const updateKnowledgeBase = ai.defineTool({
     if (el !== undefined) {
         el.content = input.content;
         writeToKnowledgeBase();
+        return `Wrote ${input.content} about ${input.topic} to knowledge base`;
     }
     knowledgeBase.push({topic: input.topic, content: input.content});
     writeToKnowledgeBase();
