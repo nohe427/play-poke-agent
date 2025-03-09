@@ -1,8 +1,9 @@
 import { z } from "genkit";
-import { ai, GcsSessionStorage, PokeState } from "../config";
+import { ai, PokeState } from "../config";
 import { gemini, gemini20ProExp0205, gemini20Flash001 } from '@genkit-ai/vertexai';
 import {gemini20ProExp0205 as AIgemini20ProExp0205} from '@genkit-ai/googleai';
-import { sendKeyPress, state, updateCurrentGoal } from "../tools/emulatorTools";
+import { sendKeyPress } from "../tools/emulatorTools";
+import { state, updateCurrentGoal } from "../tools/goals"
 import axios from "axios";
 import { GameHistory } from "../tools/history";
 
@@ -11,7 +12,7 @@ let currentState = "";
 
 const gameHistory = new GameHistory();
 
-const getCurrentState = async (): Promise<string> => {
+const getCurrentEmulatorState = async (): Promise<string> => {
     const state = await axios.get("http://localhost:8000/state");
     return state.data;
 }
@@ -24,7 +25,7 @@ export const mainFlow = ai.defineFlow({
     outputSchema: z.string(),
 }, async (input): Promise<string> => {
     previousState = currentState;
-    currentState = await getCurrentState();
+    currentState = await getCurrentEmulatorState();
     let imgPart = {media: {url: input.imgUrl}}
     try{
         const img = await axios.get(input.imgUrl, { responseType: 'arraybuffer' });
@@ -119,7 +120,7 @@ export const mainFlow = ai.defineFlow({
     const result = await ai.generate({
         system: `
         Your goal is to pick the correct tool call for the logic argument provided
-        in the prompt
+        in the prompt.
         `,
         // model: gemini20ProExp0205,
         model: gemini20Flash001,
