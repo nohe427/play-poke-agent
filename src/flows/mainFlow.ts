@@ -81,6 +81,8 @@ export const mainFlow = ai.defineFlow({
         If you think the game is stuck, send the 'a' button
 
         To advance dialog you use the 'a' button.
+
+        Try to catch pokemon you do not yet have if you have pokeballs in your inventory
         `,
         // model: gemini20ProExp0205,
         model: gemini20ProExp0205,
@@ -154,8 +156,8 @@ export const mainFlow = ai.defineFlow({
     const goalRevision = await ai.generate({
         system: `
         Update the system goal based on the current game history and screenshots.
-        If no goal needs to be updated, do not update the goal. Update the
-        knowledge base if that needs to be updated as well.
+        Update the knowledge base if that needs to be updated.
+        If no goal needs to be updated, do not update the goal. 
 
         Provide a reasoning in your response.
         `,
@@ -179,6 +181,9 @@ export const mainFlow = ai.defineFlow({
         console.log(toolRequest.toolRequest.name, input)
         if (toolRequest.toolRequest.name === "updateCurrentGoal" && input) {
             await updateCurrentGoal(input as {currentGoal: string});
+        }
+        if (toolRequest.toolRequest.name === "updateKnowledgeBase" && input) {
+            await updateKnowledgeBase(input as {topic: string, content: string});
         }
     }
 
