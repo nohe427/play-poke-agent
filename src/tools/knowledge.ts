@@ -25,6 +25,17 @@ const loadFromKnowledgeBase = (): typeof KnoweledgeSchema => {
     return JSON.parse(knowledgeBaseString);
 }
 
+export const getKnowledgeBaseAsString = (): string => {
+    let output = "";
+    for(var i = 0; i < knowledgeBase.length; i++) {
+        output += `
+<section name="${knowledgeBase[i].topic}">
+    ${knowledgeBase[i].content}
+</section>`
+    }
+    return output;
+}
+
 export const updateKnowledgeBase = ai.defineTool({
     name: 'updateKnowledgeBase',
     description: `

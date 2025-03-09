@@ -6,6 +6,7 @@ import { sendKeyPress } from "../tools/emulatorTools";
 import { state, updateCurrentGoal } from "../tools/goals"
 import axios from "axios";
 import { GameHistory } from "../tools/history";
+import { getKnowledgeBaseAsString, updateKnowledgeBase } from "../tools/knowledge";
 
 let previousState = "";
 let currentState = "";
@@ -106,6 +107,9 @@ export const mainFlow = ai.defineFlow({
 
                 Characters Goals:
                 ${state}
+
+                Knowledge Base:
+                ${getKnowledgeBaseAsString()}
                 `
             },
             imgPart,
@@ -150,16 +154,18 @@ export const mainFlow = ai.defineFlow({
     const goalRevision = await ai.generate({
         system: `
         Update the system goal based on the current game history and screenshots.
-        If no goal needs to be updated, do not update the goal.
+        If no goal needs to be updated, do not update the goal. Update the
+        knowledge base if that needs to be updated as well.
 
         Provide a reasoning in your response.
         `,
         model: gemini20Flash001,
         returnToolRequests: true,
-        tools: [updateCurrentGoal],
+        tools: [updateCurrentGoal, updateKnowledgeBase],
         prompt: [
             ...gameHistory.getHistory(),
-            {text: `current goal : ${state.currentGoal}`}
+            {text: `current goal : ${state.currentGoal}`},
+            {text: `knowledge base : ${getKnowledgeBaseAsString()}`}
         ]
     });
     const gtr = result.toolRequests;
