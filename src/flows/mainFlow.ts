@@ -168,7 +168,7 @@ export const mainFlow = ai.defineFlow({
             {text: `knowledge base : ${getKnowledgeBaseAsString()}`}
         ]
     });
-    const gtr = result.toolRequests;
+    const gtr = goalRevision.toolRequests;
     console.log(goalRevision.text);
     if (!gtr) {
         return goalRevision.text;
@@ -180,9 +180,6 @@ export const mainFlow = ai.defineFlow({
         if (toolRequest.toolRequest.name === "updateCurrentGoal" && input) {
             await updateCurrentGoal(input as {currentGoal: string});
         }
-        // if (toolRequest.toolRequest.name === "updateState" && input) {
-        //     await updateState(input as PokeState);
-        // }
     }
 
     return result.text;
