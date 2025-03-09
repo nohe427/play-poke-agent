@@ -17,7 +17,7 @@
     "@genkit-ai/googleai": "^1.0.5",
     "@genkit-ai/vertexai": "^1.0.4",
     "@google-cloud/storage": "^7.15.2",
-    "axios": "^1.8.1",
+    "axios": "^1.8.2",
     "firebase-admin": "^13.1.0",
     "genkit": "^1.0.4",
     "genkitx-anthropic": "^0.17.0"
